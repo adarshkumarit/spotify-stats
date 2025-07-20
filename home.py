@@ -13,15 +13,16 @@ st.markdown("""
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
+        font-family: 'Courier New', monospace;
         color: #000000 !important;
     }
 
-    h1, h2, h3, h4, h5, h6, label, .css-10trblm, .stMarkdown, .stCaption, .stText, .css-1d391kg {
+    h1, h2, h3, h4, h5, h6, label, .stMarkdown, .stCaption, .stText {
         color: #000000 !important;
     }
 
     [data-testid="stSidebar"] {
-        background: rgba(255, 255, 255, 0.8);
+        background: rgba(255, 255, 255, 0.85);
     }
 
     .stRadio > div, .stSelectbox > div {
@@ -36,10 +37,6 @@ st.markdown("""
         font-weight: 600;
     }
 
-    .stSubheader, .stCaption, .css-qrbaxs, .stText, .css-1cpxqw2 {
-        color: #000000 !important;
-    }
-
     footer {
         visibility: hidden;
     }
@@ -47,10 +44,10 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # ---------- 🎧 App Title ----------
-st.title("🎧 Spotify Stats Viewer")
+st.title("🖥️ Spotify Stats Viewer (Retro Style)")
 
 # ---------- Sidebar ----------
-st.sidebar.title("🌸 Navigation")
+st.sidebar.title("📟 Navigation")
 view_option = st.sidebar.radio("Select View:", ["🎵 Top Tracks", "🎤 Top Artists", "📊 Top Genres"])
 
 TIME_RANGES = {
@@ -61,12 +58,13 @@ TIME_RANGES = {
 selected_range = st.sidebar.selectbox("Select Time Range:", list(TIME_RANGES.keys()))
 time_range = TIME_RANGES[selected_range]
 
-# ---------- Spotify Authentication via st.secrets ----------
+# ---------- Spotify Authentication ----------
 sp = spotipy.Spotify(auth_manager=SpotifyOAuth(
     client_id=st.secrets["SPOTIPY_CLIENT_ID"],
     client_secret=st.secrets["SPOTIPY_CLIENT_SECRET"],
     redirect_uri=st.secrets["SPOTIPY_REDIRECT_URI"],
-    scope="user-top-read"
+    scope="user-top-read",
+    show_dialog=True
 ))
 
 # ---------- Top Tracks ----------
@@ -87,7 +85,7 @@ if view_option == "🎵 Top Tracks":
                     st.write("No preview available.")
             st.divider()
     except:
-        st.error("Authorization failed. Please check your credentials.")
+        st.error("⚠️ Authorization failed. Please check your credentials.")
 
 # ---------- Top Artists ----------
 elif view_option == "🎤 Top Artists":
@@ -106,7 +104,7 @@ elif view_option == "🎤 Top Artists":
                 st.markdown(f"[🔗 Open on Spotify]({artist['external_urls']['spotify']})")
             st.divider()
     except:
-        st.error("Authorization failed. Please check your credentials.")
+        st.error("⚠️ Authorization failed. Please check your credentials.")
 
 # ---------- Top Genres ----------
 elif view_option == "📊 Top Genres":
@@ -121,14 +119,19 @@ elif view_option == "📊 Top Genres":
         if genre_count:
             sorted_genres = sorted(genre_count.items(), key=lambda x: x[1], reverse=True)
             top_genres = dict(sorted_genres[:10])
-            st.bar_chart(top_genres)
-            st.markdown("### 🔝 Top Genres List")
+
+            # 🎨 Area Chart
+            st.markdown("#### 📈 Genre Popularity Chart")
+            st.area_chart(top_genres)
+
+            # 🔝 List View
+            st.markdown("#### 🔝 Top Genres List")
             for idx, (genre, count) in enumerate(sorted_genres[:10]):
                 st.markdown(f"{idx + 1}. **{genre.title()}** — {count} artists")
         else:
             st.info("No genres found.")
     except:
-        st.error("Authorization failed. Please check your credentials.")
+        st.error("⚠️ Authorization failed. Please check your credentials.")
 
 # ---------- Footer ----------
 st.markdown("---")
